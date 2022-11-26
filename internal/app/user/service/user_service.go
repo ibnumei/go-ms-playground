@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	"github.com/ibnumei/go-ms-playground/internal/app/domain"
-	// "golang.org/x/crypto/bcrypt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
@@ -19,7 +19,7 @@ type UserService struct {
 	userRepository UserRepository
 }
 
-func NewUserService(userRepo UserRepository) *UserService{
+func NewUserService(userRepo UserRepository) *UserService {
 	return &UserService{userRepo}
 }
 
@@ -27,22 +27,26 @@ var signatureKey = []byte("mySignaturePrivateKey")
 
 func (us UserService) Register(ctx context.Context, userBody domain.User) (string, error) {
 	// userObject := userBody
-	// user := domain.GenerateNewUser(&userObject)
-	
-	// hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(userBody.Password), bcrypt.DefaultCost)
-	// userBody.Password = string(hashedPassword)
-	fmt.Println(userBody)
+	// fmt.Println("userObject UserService", userObject)
+	// user := GenerateNewUser(&userObject)
+
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(userBody.Password), bcrypt.DefaultCost)
+	userBody.Password = string(hashedPassword)
+	fmt.Println("UserService", userBody)
+
 	if err := us.userRepository.Create(ctx, &userBody); err != nil {
 		return "", errors.New("Failed Create User")
 	}
-	return generateJWT(userBody.ID)
+
+	return generateJWT(userBody.ID, userBody.Username)
 }
 
-func generateJWT(userID int) (string, error) {
+func generateJWT(userID int, Username string) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(24 * time.Hour).Unix(),
-		"iss":     "edspert",
+		"user_id":  userID,
+		"username": Username,
+		"exp":      time.Now().Add(24 * time.Hour).Unix(),
+		"iss":      "edspert",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

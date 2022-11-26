@@ -22,7 +22,17 @@ func NewUserHandler(userService UserService) *UserHandler {
 
 func (uh UserHandler) Register (ctx *gin.Context) {
 	var userBody domain.User
-	fmt.Println(userBody)
+
+	// untuk binding data lewat ui ke object userBody
+	// kalau tidak di ctx.shouldBind, object userBody null
+	if err := ctx.ShouldBind(&userBody); err != nil {
+		ctx.JSON(400, gin.H{
+			"message": "invalid input",
+		})
+		return
+	}
+	fmt.Println("user handler", userBody)
+
 	token, err := uh.userService.Register(ctx.Request.Context(), userBody)
 	if err != nil{
 		ctx.JSON(400, gin.H{
@@ -30,6 +40,7 @@ func (uh UserHandler) Register (ctx *gin.Context) {
 		})
 		return
 	}
+
 	ctx.JSON(200, gin.H{
 		"token": token,
 	})
