@@ -15,3 +15,7 @@ type User struct {
 	UpdatedBy string    `json:"updatedBy"`
 	UpdatedAt time.Time `json:"updatedAt"`
 }
+
+// func GenerateNewUser(body *User) *User {
+
+// }
