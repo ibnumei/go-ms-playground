@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
+	// "fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -13,6 +13,7 @@ import (
 
 type UserRepository interface {
 	Create(ctx context.Context, user *domain.User) error
+	GetByEmail(ctx context.Context, email string) (domain.User, error)
 }
 
 type UserService struct {
@@ -32,7 +33,7 @@ func (us UserService) Register(ctx context.Context, userBody domain.User) (strin
 
 	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(userBody.Password), bcrypt.DefaultCost)
 	userBody.Password = string(hashedPassword)
-	fmt.Println("UserService", userBody)
+	// fmt.Println("UserService", userBody)
 
 	if err := us.userRepository.Create(ctx, &userBody); err != nil {
 		return "", errors.New("Failed Create User")
@@ -55,4 +56,16 @@ func generateJWT(userID int, Username string) (string, error) {
 		return "", err
 	}
 	return stringToken, nil
+}
+
+func (us UserService) Login(ctx context.Context, userParam domain.User) (string, error) {
+	user, err := us.userRepository.GetByEmail(ctx, userParam.Email)
+	if err != nil {
+		return "", errors.New("invalid email")
+	}
+
+	if err := user.ComparePassword(userParam.Password); err != nil {
+		return "", errors.New("invalid password")
+	}
+	return generateJWT(user.ID, user.Username)
 }

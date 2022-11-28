@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type User struct {
 	ID        int       `json:"id"`
@@ -16,6 +20,8 @@ type User struct {
 	UpdatedAt time.Time `json:"updatedAt"`
 }
 
-// func GenerateNewUser(body *User) *User {
-
-// }
+// semula ingin di tempatkan di user_service, karena masih berbentuk function
+// tapi tidak bisa karena menggunakan method struct user "func (user User)"
+func (user User) ComparePassword(password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+}

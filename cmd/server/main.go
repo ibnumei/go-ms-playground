@@ -21,6 +21,7 @@ func main() {
 	userHandler := handler.NewUserHandler(userService)
 
 	route.POST("/register", userHandler.Register)
+	route.POST("/login", userHandler.Login)
 
 	route.Run(":" + os.Getenv("PORT"))
 }
