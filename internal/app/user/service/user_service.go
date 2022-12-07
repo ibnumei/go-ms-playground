@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"os"
+
 	// "fmt"
 	"time"
 
@@ -24,7 +26,8 @@ func NewUserService(userRepo UserRepository) *UserService {
 	return &UserService{userRepo}
 }
 
-var signatureKey = []byte("mySignaturePrivateKey")
+var privateKey = os.Getenv("SIGNATURE_KEY")
+var signatureKey = []byte(privateKey)
 
 func (us UserService) Register(ctx context.Context, userBody domain.User) (string, error) {
 	// userObject := userBody
